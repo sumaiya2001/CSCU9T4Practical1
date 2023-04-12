@@ -17,6 +17,14 @@ public class TrainingRecordGUI extends JFrame implements ActionListener {
     private JTextField mins = new JTextField(2);
     private JTextField secs = new JTextField(2);
     private JTextField dist = new JTextField(4);
+    
+    private JTextField Repetitions = new JTextField(4);
+    private JTextField Recovery = new JTextField(4);
+    private JTextField terrain = new JTextField(4);
+    private JTextField tempo = new JTextField(4);
+    private JTextField where = new JTextField(4);
+    
+    
     private JLabel labn = new JLabel(" Name:");
     private JLabel labd = new JLabel(" Day:");
     private JLabel labm = new JLabel(" Month:");
@@ -24,10 +32,26 @@ public class TrainingRecordGUI extends JFrame implements ActionListener {
     private JLabel labh = new JLabel(" Hours:");
     private JLabel labmm = new JLabel(" Mins:");
     private JLabel labs = new JLabel(" Secs:");
+    
+    
+    private JLabel labRepet = new JLabel(" Repetitions:");
+    private JLabel labRecov = new JLabel(" Recovery:");
+    private JLabel labter = new JLabel(" Terrain:");
+    private JLabel labtemp = new JLabel(" Tempo:");
+    private JLabel labwhr = new JLabel(" where:");
+   
+    
     private JLabel labdist = new JLabel(" Distance (km):");
+   
     private JButton addR = new JButton("Add");
-    private JButton lookUpByDate = new JButton("Look Up");
+    private JButton addC = new JButton("AddC");
+    private JButton addS = new JButton("AddS");
 
+    
+    private JButton lookUpByDate = new JButton("Look Up");
+    private JButton FindAllByDate = new JButton("Find All ByDate");
+    private JButton RemoveEntry = new JButton("Remove");
+    
     private TrainingRecord myAthletes = new TrainingRecord();
 
     private JTextArea outputArea = new JTextArea(5, 50);
@@ -64,10 +88,39 @@ public class TrainingRecordGUI extends JFrame implements ActionListener {
         add(labdist);
         add(dist);
         dist.setEditable(true);
+        
+        add(labRepet);
+        add(Repetitions);
+        Repetitions.setEditable(true);
+        add(labRecov);
+        add(Recovery);
+        Recovery.setEditable(true);
+        add(labter);
+        add(terrain);
+        terrain.setEditable(true);
+        add(labtemp);
+        add(tempo);
+        tempo.setEditable(true);
+        add(labwhr);
+        add(where);
+        where.setEditable(true);
+        
+        
+        
         add(addR);
         addR.addActionListener(this);
+        add(addC);
+        addC.addActionListener(this);
+        add(addS);
+        addS.addActionListener(this);
+        
         add(lookUpByDate);
         lookUpByDate.addActionListener(this);
+        add(FindAllByDate);
+        FindAllByDate.addActionListener(this);
+        add(RemoveEntry);
+        RemoveEntry.addActionListener(this);
+        
         add(outputArea);
         outputArea.setEditable(false);
         setSize(720, 200);
@@ -83,16 +136,28 @@ public class TrainingRecordGUI extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent event) {
         String message = "";
         if (event.getSource() == addR) {
-            message = addEntry("generic");
+            message = addEntryR("generic");
+        }
+        if (event.getSource() == addC) {
+            message = addEntryC("generic");
+        }
+        if (event.getSource() == addS) {
+            message = addEntryS("generic");
         }
         if (event.getSource() == lookUpByDate) {
             message = lookupEntry();
+        }
+        if (event.getSource() == FindAllByDate) {
+            message = lookupAll();
+        }
+        if (event.getSource() == RemoveEntry) {
+            message = RemoveEntry();
         }
         outputArea.setText(message);
         blankDisplay();
     } // actionPerformed
 
-    public String addEntry(String what) {
+    public String addEntryR(String what) {
         String message = "Record added\n";
         System.out.println("Adding "+what+" entry to the records");
         String n = name.getText();
@@ -103,18 +168,89 @@ public class TrainingRecordGUI extends JFrame implements ActionListener {
         int h = Integer.parseInt(hours.getText());
         int mm = Integer.parseInt(mins.getText());
         int s = Integer.parseInt(secs.getText());
-        Entry e = new Entry(n, d, m, y, h, mm, s, km);
+        int Repet = Integer.parseInt(Repetitions.getText());
+        int Recov = Integer.parseInt(Recovery.getText());
+        Entry e = new SprintEntry(n, d, m, y, h, mm, s, km, Repet, Recov);
+        myAthletes.addEntry(e);
+        return message; 
+    }
+    
+    public String addEntryC(String what) {
+        String message = "Record added\n";
+        System.out.println("Adding "+what+" entry to the records");
+        String n = name.getText();
+        int m = Integer.parseInt(month.getText());
+        int d = Integer.parseInt(day.getText());
+        int y = Integer.parseInt(year.getText());
+        float km = java.lang.Float.parseFloat(dist.getText());
+        int h = Integer.parseInt(hours.getText());
+        int mm = Integer.parseInt(mins.getText());
+        int s = Integer.parseInt(secs.getText());
+        String ter = terrain.getText();
+        String temp = tempo.getText();
+        Entry e = new CycleEntry(n, d, m, y, h, mm, s, km, ter, temp);
         myAthletes.addEntry(e);
         return message;
     }
     
+    public String addEntryS(String what) {
+    	Entry e;
+        String message = "Record added\n";
+        System.out.println("Adding "+what+" entry to the records");
+        String n = name.getText();
+        int m = Integer.parseInt(month.getText());
+        int d = Integer.parseInt(day.getText());
+        int y = Integer.parseInt(year.getText());
+        float km = java.lang.Float.parseFloat(dist.getText());
+        int h = Integer.parseInt(hours.getText());
+        int mm = Integer.parseInt(mins.getText());
+        int s = Integer.parseInt(secs.getText());
        
+    	String ter = terrain.getText();
+        String temp = tempo.getText();
+        int Repet = Integer.parseInt(Repetitions.getText());
+        int Recov = Integer.parseInt(Recovery.getText());
+    	String whr = where.getText();
+   
+    if (!whr.isEmpty())
+    	e = new SwimEntry(n, d, m, y, h, mm, s, km, whr); 
+    else if (!temp.isEmpty() && !ter.isEmpty())
+    	e = new CycleEntry(n, d, m, y, h, mm, s, km, ter, temp);
+    else if (!Repetitions.getText().isEmpty() && !Recovery.getText().isEmpty() )
+        e = new SwimEntry(n, d, m, y, h, mm, s, km, whr);
+    else 
+      e = new Entry (n, d, m, y, h, mm, s, km);
+      myAthletes.addEntry(e);
+     
+      return message;
+    		
+}
+    
     public String lookupEntry() {
         int m = Integer.parseInt(month.getText());
         int d = Integer.parseInt(day.getText());
         int y = Integer.parseInt(year.getText());
         outputArea.setText("looking up record ...");
         String message = myAthletes.lookupEntry(d, m, y);
+        return message;
+    }
+
+    public String lookupAll() {
+        int m = Integer.parseInt(month.getText());
+        int d = Integer.parseInt(day.getText());
+        int y = Integer.parseInt(year.getText());
+        outputArea.setText("looking up record ...");
+        String message = myAthletes.lookupAll(d, m, y);
+        return message;
+    }
+    
+    public String RemoveEntry() {
+    	String n= name.getText();
+        int m = Integer.parseInt(month.getText());
+        int d = Integer.parseInt(day.getText());
+        int y = Integer.parseInt(year.getText());
+        outputArea.setText("looking up record ...");
+        String message = myAthletes.removeRecord( n ,d, m, y);
         return message;
     }
 
